@@ -38,7 +38,8 @@
 git clone https://github.com/yohey-w/multi-agent-shogun
 cd multi-agent-shogun
 bash first_setup.sh                        # 初回セットアップ: 設定・依存関係・MCP
-source ~/.bashrc                           # PATH反映
+source ~/.bashrc                           # PATH反映 (bash)
+source ~/.zshrc                            # PATH反映 (zsh)
 claude --dangerously-skip-permissions      # 初回のみ: OAuth認証 + Bypass承認 → /exit で退出
 bash shutsujin_departure.sh                # 全エージェント起動
 ```
@@ -256,8 +257,9 @@ cd /mnt/c/tools/multi-agent-shogun
 `first_setup.sh` 完了後、一度だけ以下を実行して認証：
 
 ```bash
-# 1. PATHの反映
-source ~/.bashrc
+# 1. PATHの反映（使用中のシェルに合わせて実行）
+source ~/.bashrc   # bash
+source ~/.zshrc    # zsh
 
 # 2. OAuthログイン + Bypass Permissions承認（1コマンドで完了）
 claude --dangerously-skip-permissions
@@ -1574,7 +1576,7 @@ tmux kill-session -t multiagent
 <details>
 <summary><b>便利なエイリアス</b>（クリックで展開）</summary>
 
-`first_setup.sh` を実行すると、以下のエイリアスが `~/.bashrc` に自動追加されます：
+`first_setup.sh` を実行すると、以下のショートカットが `~/.bashrc` と `~/.zshrc` の両方に自動追加されます：
 
 ```bash
 alias csst='cd /mnt/c/tools/multi-agent-shogun && ./shutsujin_departure.sh'
@@ -1582,7 +1584,7 @@ alias css='tmux attach-session -t shogun'      # 将軍ウィンドウの起動
 alias csm='tmux attach-session -t multiagent'  # 家老・足軽ウィンドウの起動
 ```
 
-※ エイリアスを反映するには `source ~/.bashrc` を実行するか、PowerShellで `wsl --shutdown` してからターミナルを開き直してください。
+※ 反映するには `source ~/.bashrc`（bash）または `source ~/.zshrc`（zsh）を実行するか、PowerShellで `wsl --shutdown` してからターミナルを開き直してください。
 
 </details>
 

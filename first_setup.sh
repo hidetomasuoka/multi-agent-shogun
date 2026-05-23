@@ -44,6 +44,9 @@ log_step() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# シェル設定の追記対象（bash / zsh 両対応）
+SHELL_RC_FILES=("$HOME/.bashrc" "$HOME/.zshrc")
+
 # 結果追跡用変数
 RESULTS=()
 HAS_ERROR=false
@@ -235,7 +238,8 @@ else
         echo ""
         echo "  手動でインストールしてください:"
         echo "    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash"
-        echo "    source ~/.bashrc"
+        echo "    source ~/.bashrc   # bash"
+        echo "    source ~/.zshrc    # zsh"
         echo "    nvm install 20"
         echo ""
         RESULTS+=("Node.js: 未インストール (nvm失敗)")
@@ -498,13 +502,16 @@ if [ "$NEED_CLAUDE_INSTALL" = true ]; then
     # PATHを更新（インストール直後は反映されていない可能性）
     export PATH="$HOME/.local/bin:$PATH"
 
-    # .bashrc に永続化（重複追加を防止）
-    if ! grep -q 'export PATH="\$HOME/.local/bin:\$PATH"' "$HOME/.bashrc" 2>/dev/null; then
-        echo '' >> "$HOME/.bashrc"
-        echo '# Claude Code CLI PATH (added by first_setup.sh)' >> "$HOME/.bashrc"
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
-        log_info "~/.local/bin を ~/.bashrc の PATH に追加しました"
-    fi
+    # shell rc に永続化（重複追加を防止 / bash + zsh）
+    for rc_file in "${SHELL_RC_FILES[@]}"; do
+        touch "$rc_file"
+        if ! grep -q 'export PATH="\$HOME/.local/bin:\$PATH"' "$rc_file" 2>/dev/null; then
+            echo '' >> "$rc_file"
+            echo '# Claude Code CLI PATH (added by first_setup.sh)' >> "$rc_file"
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$rc_file"
+            log_info "~/.local/bin を ${rc_file} の PATH に追加しました"
+        fi
+    done
 
     if command -v claude &> /dev/null; then
         CLAUDE_VERSION=$(claude --version 2>/dev/null || echo "unknown")
@@ -784,12 +791,9 @@ done
 RESULTS+=("実行権限: OK")
 
 # ============================================================
-# STEP 10: bashrc alias設定
+# STEP 10: shell rc alias設定
 # ============================================================
 log_step "STEP 10: alias設定"
-
-# alias追加対象ファイル
-BASHRC_FILE="$HOME/.bashrc"
 
 # css/csm を関数として定義（destroy-unattached で自動掃除）
 # - 複数端末から接続しても画面サイズが干渉しない
@@ -801,66 +805,67 @@ DASH_FUNC="dash() { python3 \"$SCRIPT_DIR/scripts/dashboard-viewer.py\" \"\$@\";
 
 ALIAS_ADDED=false
 
-if [ -f "$BASHRC_FILE" ]; then
+for rc_file in "${SHELL_RC_FILES[@]}"; do
+    touch "$rc_file"
+
     # 古い alias 形式を削除（存在する場合）
-    if grep -q "alias css=" "$BASHRC_FILE" 2>/dev/null; then
-        sed -i '/alias css=/d' "$BASHRC_FILE"
-        log_info "旧 alias css を削除しました"
+    if grep -q "alias css=" "$rc_file" 2>/dev/null; then
+        sed -i '/alias css=/d' "$rc_file"
+        log_info "旧 alias css を削除しました (${rc_file})"
     fi
-    if grep -q "alias csm=" "$BASHRC_FILE" 2>/dev/null; then
-        sed -i '/alias csm=/d' "$BASHRC_FILE"
-        log_info "旧 alias csm を削除しました"
+    if grep -q "alias csm=" "$rc_file" 2>/dev/null; then
+        sed -i '/alias csm=/d' "$rc_file"
+        log_info "旧 alias csm を削除しました (${rc_file})"
     fi
 
     # css 関数
-    if ! grep -q "^css()" "$BASHRC_FILE" 2>/dev/null; then
-        if ! grep -q "multi-agent-shogun aliases" "$BASHRC_FILE" 2>/dev/null; then
-            echo "" >> "$BASHRC_FILE"
-            echo "# multi-agent-shogun aliases (added by first_setup.sh)" >> "$BASHRC_FILE"
+    if ! grep -q "^css()" "$rc_file" 2>/dev/null; then
+        if ! grep -q "multi-agent-shogun aliases" "$rc_file" 2>/dev/null; then
+            echo "" >> "$rc_file"
+            echo "# multi-agent-shogun aliases (added by first_setup.sh)" >> "$rc_file"
         fi
-        echo "$CSS_FUNC" >> "$BASHRC_FILE"
-        log_info "css 関数を追加しました（将軍ウィンドウ — 自動掃除付き）"
+        echo "$CSS_FUNC" >> "$rc_file"
+        log_info "css 関数を追加しました（将軍ウィンドウ — 自動掃除付き / ${rc_file}）"
         ALIAS_ADDED=true
     else
         # 関数は存在する → 最新版に更新
-        sed -i '/^css()/d' "$BASHRC_FILE"
-        echo "$CSS_FUNC" >> "$BASHRC_FILE"
-        log_info "css 関数を更新しました"
+        sed -i '/^css()/d' "$rc_file"
+        echo "$CSS_FUNC" >> "$rc_file"
+        log_info "css 関数を更新しました (${rc_file})"
         ALIAS_ADDED=true
     fi
 
     # csm 関数
-    if ! grep -q "^csm()" "$BASHRC_FILE" 2>/dev/null; then
-        echo "$CSM_FUNC" >> "$BASHRC_FILE"
-        log_info "csm 関数を追加しました（家老・足軽ウィンドウ — 自動掃除付き）"
+    if ! grep -q "^csm()" "$rc_file" 2>/dev/null; then
+        echo "$CSM_FUNC" >> "$rc_file"
+        log_info "csm 関数を追加しました（家老・足軽ウィンドウ — 自動掃除付き / ${rc_file}）"
         ALIAS_ADDED=true
     else
-        sed -i '/^csm()/d' "$BASHRC_FILE"
-        echo "$CSM_FUNC" >> "$BASHRC_FILE"
-        log_info "csm 関数を更新しました"
+        sed -i '/^csm()/d' "$rc_file"
+        echo "$CSM_FUNC" >> "$rc_file"
+        log_info "csm 関数を更新しました (${rc_file})"
         ALIAS_ADDED=true
     fi
 
     # dash 関数
-    if ! grep -q "^dash()" "$BASHRC_FILE" 2>/dev/null; then
-        echo "$DASH_FUNC" >> "$BASHRC_FILE"
-        log_info "dash 関数を追加しました（ダッシュボードビューア）"
+    if ! grep -q "^dash()" "$rc_file" 2>/dev/null; then
+        echo "$DASH_FUNC" >> "$rc_file"
+        log_info "dash 関数を追加しました（ダッシュボードビューア / ${rc_file}）"
         ALIAS_ADDED=true
     else
-        sed -i '/^dash()/d' "$BASHRC_FILE"
-        echo "$DASH_FUNC" >> "$BASHRC_FILE"
-        log_info "dash 関数を更新しました"
+        sed -i '/^dash()/d' "$rc_file"
+        echo "$DASH_FUNC" >> "$rc_file"
+        log_info "dash 関数を更新しました (${rc_file})"
         ALIAS_ADDED=true
     fi
-else
-    log_warn "$BASHRC_FILE が見つかりません"
-fi
+done
 
 if [ "$ALIAS_ADDED" = true ]; then
-    log_success "alias設定を追加しました（destroy-unattached 方式）"
-    log_warn "alias を反映するには、以下のいずれかを実行してください："
-    log_info "  1. source ~/.bashrc"
-    log_info "  2. PowerShell で 'wsl --shutdown' してからターミナルを開き直す"
+    log_success "alias設定を追加/更新しました（~/.bashrc / ~/.zshrc, destroy-unattached 方式）"
+    log_warn "alias を反映するには、使用シェルに応じて以下を実行してください："
+    log_info "  1. source ~/.bashrc   # bash"
+    log_info "  2. source ~/.zshrc    # zsh"
+    log_info "  3. PowerShell で 'wsl --shutdown' してからターミナルを開き直す"
     log_info "  ※ ウィンドウを閉じるだけでは WSL が終了しないため反映されません"
 fi
 
@@ -990,7 +995,8 @@ echo ""
 echo "  ⚠️  初回のみ: 以下を手動で実行してください"
 echo ""
 echo "  STEP 0: PATHの反映（このシェルにインストール結果を反映）"
-echo "     source ~/.bashrc"
+echo "     source ~/.bashrc   # bash"
+echo "     source ~/.zshrc    # zsh"
 echo ""
 echo "  STEP A: OAuth認証 + Bypass Permissions の承認（1コマンドで完了）"
 echo "     claude --dangerously-skip-permissions"
