@@ -38,7 +38,8 @@ Run 10 AI coding agents in parallel — **Claude Code, OpenAI Codex, GitHub Copi
 git clone https://github.com/yohey-w/multi-agent-shogun
 cd multi-agent-shogun
 bash first_setup.sh                        # one-time setup: config, dependencies, MCP
-source ~/.bashrc                           # reload PATH
+source ~/.bashrc                           # reload PATH (bash)
+source ~/.zshrc                            # reload PATH (zsh)
 claude --dangerously-skip-permissions      # first run only: OAuth + accept Bypass Permissions → /exit
 bash shutsujin_departure.sh                # launch all agents
 ```
@@ -256,8 +257,9 @@ cd /mnt/c/tools/multi-agent-shogun
 After `first_setup.sh`, run these commands once to authenticate:
 
 ```bash
-# 1. Apply PATH changes
-source ~/.bashrc
+# 1. Apply PATH changes (run the command for your shell)
+source ~/.bashrc   # bash
+source ~/.zshrc    # zsh
 
 # 2. OAuth login + Bypass Permissions approval (one command)
 claude --dangerously-skip-permissions
@@ -1630,7 +1632,7 @@ tmux kill-session -t multiagent
 <details>
 <summary><b>Convenient Aliases</b> (click to expand)</summary>
 
-Running `first_setup.sh` automatically adds these aliases to `~/.bashrc`:
+Running `first_setup.sh` automatically adds these shortcuts to both `~/.bashrc` and `~/.zshrc`:
 
 ```bash
 alias csst='cd /mnt/c/tools/multi-agent-shogun && ./shutsujin_departure.sh'
@@ -1638,7 +1640,7 @@ alias css='tmux attach-session -t shogun'      # Connect to Shogun
 alias csm='tmux attach-session -t multiagent'  # Connect to Karo + Ashigaru
 ```
 
-To apply aliases: run `source ~/.bashrc` or restart your terminal (PowerShell: `wsl --shutdown` then reopen).
+To apply shortcuts: run `source ~/.bashrc` (bash) or `source ~/.zshrc` (zsh), or restart your terminal (PowerShell: `wsl --shutdown` then reopen).
 
 </details>
 
