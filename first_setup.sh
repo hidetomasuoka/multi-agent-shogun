@@ -84,6 +84,15 @@ else
     log_warn "OS情報を取得できませんでした"
 fi
 
+# macOS 対応: sed -i はmacOSでは空文字列引数が必要
+sed_inplace() {
+    if [ "$UNAME_S" = "Darwin" ]; then
+        sed -i '' "$@"
+    else
+        sed -i "$@"
+    fi
+}
+
 # WSL チェック
 IS_WSL=false
 if grep -qi microsoft /proc/version 2>/dev/null; then
@@ -810,11 +819,11 @@ for rc_file in "${SHELL_RC_FILES[@]}"; do
 
     # 古い alias 形式を削除（存在する場合）
     if grep -q "alias css=" "$rc_file" 2>/dev/null; then
-        sed -i '/alias css=/d' "$rc_file"
+        sed_inplace '/alias css=/d' "$rc_file"
         log_info "旧 alias css を削除しました (${rc_file})"
     fi
     if grep -q "alias csm=" "$rc_file" 2>/dev/null; then
-        sed -i '/alias csm=/d' "$rc_file"
+        sed_inplace '/alias csm=/d' "$rc_file"
         log_info "旧 alias csm を削除しました (${rc_file})"
     fi
 
@@ -829,7 +838,7 @@ for rc_file in "${SHELL_RC_FILES[@]}"; do
         ALIAS_ADDED=true
     else
         # 関数は存在する → 最新版に更新
-        sed -i '/^css()/d' "$rc_file"
+        sed_inplace '/^css()/d' "$rc_file"
         echo "$CSS_FUNC" >> "$rc_file"
         log_info "css 関数を更新しました (${rc_file})"
         ALIAS_ADDED=true
@@ -841,7 +850,7 @@ for rc_file in "${SHELL_RC_FILES[@]}"; do
         log_info "csm 関数を追加しました（家老・足軽ウィンドウ — 自動掃除付き / ${rc_file}）"
         ALIAS_ADDED=true
     else
-        sed -i '/^csm()/d' "$rc_file"
+        sed_inplace '/^csm()/d' "$rc_file"
         echo "$CSM_FUNC" >> "$rc_file"
         log_info "csm 関数を更新しました (${rc_file})"
         ALIAS_ADDED=true
@@ -853,7 +862,7 @@ for rc_file in "${SHELL_RC_FILES[@]}"; do
         log_info "dash 関数を追加しました（ダッシュボードビューア / ${rc_file}）"
         ALIAS_ADDED=true
     else
-        sed -i '/^dash()/d' "$rc_file"
+        sed_inplace '/^dash()/d' "$rc_file"
         echo "$DASH_FUNC" >> "$rc_file"
         log_info "dash 関数を更新しました (${rc_file})"
         ALIAS_ADDED=true
