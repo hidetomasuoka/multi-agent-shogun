@@ -44,6 +44,8 @@ claude --dangerously-skip-permissions      # first run only: OAuth + accept Bypa
 bash shutsujin_departure.sh                # launch all agents
 ```
 
+If you plan to use OpenCode, `first_setup.sh` now also detects `opencode` and can install `opencode-ai` for you before launch.
+
 > For full install steps (incl. Windows) and the first-30-minutes walkthrough, see [🚀 Quick Start](#-quick-start) and the basic usage section below.
 
 Type a command in the Shogun pane:
@@ -614,7 +616,7 @@ cli:
 OpenRouter setup has two separate pieces:
 
 1. **Model routing** goes in `config/settings.yaml` as shown above (`type: opencode`, `model: openrouter/...`).
-2. **Provider authentication** is configured in OpenCode, not in `settings.yaml`. Run OpenCode once as the same OS user that will launch Shogun, then use `/connect` → `OpenRouter` and paste the API key. OpenCode stores provider credentials in its own user data under that OS user (for example under `~/.local/share/opencode/`; the exact file/database is OpenCode-internal). For headless deployments that use environment-based provider credentials, make sure the shell that runs `shutsujin_departure.sh` has `OPENROUTER_API_KEY` loaded.
+2. **Provider authentication** is configured in OpenCode, not in `settings.yaml`. `first_setup.sh` prints this reminder, but the actual connection is still manual: run OpenCode once as the same OS user that will launch Shogun, then use `/connect` → `OpenRouter` and paste the API key. OpenCode stores provider credentials in its own user data under that OS user (for example under `~/.local/share/opencode/`; the exact file/database is OpenCode-internal). For headless deployments that use environment-based provider credentials, make sure the shell that runs `shutsujin_departure.sh` has `OPENROUTER_API_KEY` loaded.
 
 Do not put API keys in `config/settings.yaml`, `config/opencode-tui.json`, or `.opencode/agents/*.md`. Those files only describe routing, tmux-safe keybindings, and generated agent definitions.
 
