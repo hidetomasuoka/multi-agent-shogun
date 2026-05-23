@@ -119,7 +119,7 @@ teardown() {
 
 @test "first_setup: missing opencode is skipped in non-interactive mode and template includes opencode example" {
     run env HOME="$TEST_HOME" PATH="$TEST_BIN:/usr/bin:/bin" TEST_STUB_BIN="$TEST_BIN" \
-        bash "$TEST_PROJECT/first_setup.sh"
+        INSTALL_OPENCODE=false bash "$TEST_PROJECT/first_setup.sh"
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"OpenCode CLI: スキップ (任意)"* ]]
